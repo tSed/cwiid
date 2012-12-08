@@ -15,6 +15,11 @@ if test "$YACC" != "bison -y"; then
 	AC_MSG_ERROR([bison not found])
 fi
 
+AC_ARG_ENABLE(
+	[wmgui],
+	[AS_HELP_STRING([--disable-wmgui],[Do not build wmgui binary (also drop the gtk-2/glib2 dependency)])],
+	[ENABLE_WMGUI="$enableval"],[ENABLE_WMGUI=yes])
+
 AC_ARG_WITH(
 	[python],
 	[AS_HELP_STRING([--without-python],[compile without python support])],
@@ -98,10 +103,13 @@ else
 fi
 AC_SUBST(LDCONFIG)
 
-pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
-PKG_CHECK_MODULES([GTK], [$pkg_modules])
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
+if test $ENABLE_WMGUI = yes ; then
+	pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
+	PKG_CHECK_MODULES([GTK], [$pkg_modules])
+	AC_SUBST(GTK_CFLAGS)
+	AC_SUBST(GTK_LIBS)
+	AC_SUBST(WMGUI, wmgui)
+fi
 
 AC_OUTPUT(
 	[Makefile]
