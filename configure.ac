@@ -20,6 +20,11 @@ AC_ARG_ENABLE(
 	[AS_HELP_STRING([--disable-wmgui],[Do not build wmgui binary (also drop the gtk-2/glib2 dependency)])],
 	[ENABLE_WMGUI="$enableval"],[ENABLE_WMGUI=yes])
 
+AC_ARG_ENABLE(
+	[wminput],
+	[AS_HELP_STRING([--disable-wminput],[Do not build wminput binary])],
+	[ENABLE_WMINPUT="$enableval"],[ENABLE_WMINPUT=yes])
+
 AC_ARG_WITH(
 	[python],
 	[AS_HELP_STRING([--without-python],[compile without python support])],
@@ -49,6 +54,8 @@ if test $PYTHON; then
 	PYTHON_VERSION=[`$PYTHON -c 'import sys; print sys.version[:3]'`]
 	AC_SUBST(PYTHON_VERSION)
 	AC_DEFINE([HAVE_PYTHON],1,[Define to 1 if python support is enabled])
+if test $ENABLE_WMINPUT = yes ; then
+	AC_SUBST(WMINPUT, wminput)
 fi
 
 AC_CHECK_LIB([pthread], [pthread_create],,
@@ -102,6 +109,10 @@ else
 	LDCONFIG="ldconfig"
 fi
 AC_SUBST(LDCONFIG)
+
+if test $ENABLE_WMINPUT = yes ; then
+	AC_SUBST(WMINPUT, wminput)
+fi
 
 if test $ENABLE_WMGUI = yes ; then
 	pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"

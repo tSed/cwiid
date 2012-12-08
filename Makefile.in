@@ -3,7 +3,7 @@
 include @top_builddir@/defs.mak
 
 LIB_DIRS = libcwiid
-BIN_DIRS = @WMGUI@ wminput lswm
+BIN_DIRS = @WMGUI@ @WMINPUT@ lswm
 DOC_DIRS = man doc
 ifdef PYTHON
 BIND_DIRS = python
