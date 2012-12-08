@@ -1,6 +1,8 @@
 AC_INIT(CWiid,0.6.00,donnie.smith@gatech.edu)
 AC_CONFIG_HEADER(common/include/config.h)
 
+m4_include([m4/am-check-python-headers.m4])
+
 AC_PROG_CC
 AC_PROG_AWK
 AC_PROG_LEX
@@ -27,35 +29,28 @@ AC_ARG_ENABLE(
 
 AC_ARG_WITH(
 	[python],
-	[AS_HELP_STRING([--without-python],[compile without python support])],
-	[case $withval in 
-		yes)
-			REQUIRE_PYTHON=1
-			PYTHON_NAME=python
-		;;
-		no)
-			REQUIRE_PYTHON=
-			PYTHON_NAME=
-		;;
-		*)
-			REQUIRE_PYTHON=1
-			PYTHON_NAME=$withval
-		;;
-	esac],
-	[REQUIRE_PYTHON=1; PYTHON_NAME=python])
-if test $REQUIRE_PYTHON; then
-	AC_CHECK_PROGS([PYTHON],$PYTHON_NAME)
-	if test $REQUIRE_PYTHON -a ! $PYTHON; then
-		AC_MSG_ERROR([$PYTHON_NAME not found])
+	[AS_HELP_STRING([--without-python],[Compile without python support])],
+	[WITH_PYTHON="$withval"],[WITH_PYTHON=yes])
+
+if test $WITH_PYTHON = yes ; then
+	AM_PATH_PYTHON([2.4],, [AC_MSG_ERROR([Python not found])])
+	PYTHON_LDVERSION="`$PYTHON -c "import sys, sysconfig; sys.stdout.write(sysconfig.get_config_vars().get('LDVERSION', sysconfig.get_config_vars().get('VERSION')))"`"
+	if test "$PYTHON_VERSION" != "$PYTHON_LDVERSION" ; then
+		PYTHON_VERSION="$PYTHON_LDVERSION"
 	fi
-fi
-AC_SUBST(PYTHON)
-if test $PYTHON; then
-	PYTHON_VERSION=[`$PYTHON -c 'import sys; print sys.version[:3]'`]
-	AC_SUBST(PYTHON_VERSION)
-	AC_DEFINE([HAVE_PYTHON],1,[Define to 1 if python support is enabled])
-if test $ENABLE_WMINPUT = yes ; then
-	AC_SUBST(WMINPUT, wminput)
+	case "$PYTHON_VERSION" in
+	2.*)	AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+		AC_SUBST(PYTHON)
+		AC_SUBST(PYTHON_VERSION)
+		AC_SUBST(PYTHON_PREFIX)
+		AC_SUBST(PYTHON_EXEC_PREFIX)
+		AC_SUBST(pythondir)
+		AC_DEFINE([HAVE_PYTHON],1,[Define to 1 if python support is enabled])
+		;;
+	3.*)	AC_MSG_WARN([wminput is not Python3 compliant. Disable wminput build.])
+		PYTHON_VERSION= PYTHON= ENABLE_WMINPUT=no
+		;;
+	esac
 fi
 
 AC_CHECK_LIB([pthread], [pthread_create],,
@@ -142,4 +137,3 @@ AC_OUTPUT(
 	[lswm/Makefile]
 	[python/Makefile]
 	)
-

@@ -22,7 +22,7 @@ YFLAGS += -d
 
 ifdef PYTHON
 	SOURCES += py_plugin.c
-	CFLAGS += -I/usr/include/python@PYTHON_VERSION@
+	CFLAGS += -I@PYTHON_INCLUDES@
 	LDLIBS += -lpython@PYTHON_VERSION@
 endif
 
